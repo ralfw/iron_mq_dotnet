@@ -66,13 +66,14 @@ namespace io.iron.ironmq
         private string request(string method, string endpoint, string body)
         {
             string path = "/" + API_VERSION + "/projects/" + projectId + "/" + endpoint;
-
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(PROTO + "://" + HOST + ":" + PORT + path);
-            request.Headers.Add("Content-Type", "application/json");
-            request.Headers.Add("Authorization", "OAuth" + token);
-            request.Headers.Add("User-Agent", "IronMQ .Net Client");
+            string uri = PROTO + "://" + HOST + ":" + PORT + path;
+            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
+            request.ContentType = "application/json";
+            request.Headers.Add("Authorization", "OAuth " + token);
+            request.UserAgent = "IronMQ .Net Client";
             if (body != null)
             {
+                request.Method = "POST";
                 using (System.IO.StreamWriter write = new System.IO.StreamWriter(request.GetRequestStream()))
                 {
                     write.Write(body);
