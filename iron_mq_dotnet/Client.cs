@@ -71,9 +71,9 @@ namespace io.iron.ironmq
             request.ContentType = "application/json";
             request.Headers.Add("Authorization", "OAuth " + token);
             request.UserAgent = "IronMQ .Net Client";
+            request.Method = method;
             if (body != null)
-            {
-                request.Method = "POST";
+            {                
                 using (System.IO.StreamWriter write = new System.IO.StreamWriter(request.GetRequestStream()))
                 {
                     write.Write(body);
