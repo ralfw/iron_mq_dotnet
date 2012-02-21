@@ -39,10 +39,10 @@ Choosing Cloud
 ==============
 **Initialize** a client and get a queue object (Amazon):
 
-    Client client = new Client("my project", "my token","mq-aws-us-east-1.iron.io",443);	// Amazon (default)
+    Client client = new Client("my project", "my token", "mq-aws-us-east-1.iron.io");	// Amazon (default)
 
 **Initialize** a client and get a queue object (Rackspace):
   
-    Client client = new Client("my project", "my token","mq-rackspace-dfw.iron.io",443);	// Rackspace
+    Client client = new Client("my project", "my token", "mq-rackspace-dfw.iron.io");	// Rackspace
 
 
