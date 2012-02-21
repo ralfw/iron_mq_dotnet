@@ -21,6 +21,9 @@ namespace io.iron.ironmq
         private string projectId = string.Empty;
         private string token = string.Empty;
 
+        public string Host { get; private set; }
+        public int Port { get; private set; }
+
         private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
         /// <summary>
@@ -30,11 +33,14 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="projectId">projectId A 24-character project ID.</param>
         /// <param name="token">token An OAuth token.</param>
-        public Client(string projectId, string token)
+        public Client(string projectId, string token, string host = HOST, int port = PORT)
         {
             this.projectId = projectId;
             this.token = token;
+            this.Host = host;
+            this.Port = port;
         }
+
 
        
         /// <summary>
@@ -66,7 +72,7 @@ namespace io.iron.ironmq
         private string request(string method, string endpoint, string body)
         {
             string path = "/" + API_VERSION + "/projects/" + projectId + "/" + endpoint;
-            string uri = PROTO + "://" + HOST + ":" + PORT + path;
+            string uri = PROTO + "://" + this.Host + ":" + this.Port + path;
             HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
             request.ContentType = "application/json";
             request.Headers.Add("Authorization", "OAuth " + token);
