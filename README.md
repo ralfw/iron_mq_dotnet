@@ -10,11 +10,12 @@ Getting Started
 
 The .dll file will appear in your bin directory.
 
+
 The Basics
 ==========
 **Initialize** a client and get a queue object:
 
-    Client client = new Client("my project", "my token");
+    Client client = new Client("my project", "my token");	// defualt Host and Port
     Queue queue = client.queue("my_queue");
 
 **Push** a message on the queue:
@@ -32,3 +33,16 @@ default timeout is 10 minutes.)
 **Delete** a message from the queue:
 
     queue.deleteMessage(msg);
+
+
+Choosing Cloud
+==============
+**Initialize** a client and get a queue object (Amazon):
+
+    Client client = new Client("my project", "my token","mq-aws-us-east-1.iron.io",443);	// Amazon (default)
+
+**Initialize** a client and get a queue object (Rackspace):
+  
+    Client client = new Client("my project", "my token","mq-rackspace-dfw.iron.io",443);	// Rackspace
+
+
