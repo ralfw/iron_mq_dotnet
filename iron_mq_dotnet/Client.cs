@@ -49,10 +49,25 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="name">param name The name of the Queue to create.</param>
         /// <returns></returns>
-        public Queue queue(string name)
-        {
-            return new Queue(this, name);           
-        }       
+        public Queue queue (string name)
+		{
+			return new Queue (this, name);           
+		}
+		
+		/// <summary>
+		/// Returns list of queues
+		/// </summary>
+		/// <param name="page">
+		/// Queue list page
+		/// </param>
+		public string[] queues (int page = 0)
+		{
+			string ep = "queues";
+			if (page != 0) {
+				ep += "?page=" + page.ToString ();
+			}
+			return serializer.Deserialize<string[]> (@get (ep));
+		}
 
         public string delete(string endpoint)
         {
