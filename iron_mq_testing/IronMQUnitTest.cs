@@ -1,11 +1,7 @@
-﻿using System;
-using System.Text;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Configuration;
 
-using io.iron.ironmq; 
+using io.iron.ironmq;
 using io.iron.ironmq.Data;
 
 namespace iron_mq_testing
