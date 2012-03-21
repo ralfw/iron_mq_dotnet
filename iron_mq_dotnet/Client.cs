@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Web;
+﻿using System.Net;
 using System.Web.Script.Serialization;
 
 using io.iron.ironmq.Data;
@@ -16,7 +11,6 @@ namespace io.iron.ironmq
         private const string        HOST =          "mq-aws-us-east-1.iron.io";
         private const int           PORT =          443;
         private const string        API_VERSION =   "1";
-
 
         private string projectId = string.Empty;
         private string token = string.Empty;
@@ -41,33 +35,31 @@ namespace io.iron.ironmq
             this.Port = port;
         }
 
-
-       
         /// <summary>
         /// Returns a Queue using the given name.
         /// The network is not accessed during this call.
         /// </summary>
         /// <param name="name">param name The name of the Queue to create.</param>
         /// <returns></returns>
-        public Queue queue (string name)
-		{
-			return new Queue (this, name);           
-		}
-		
-		/// <summary>
-		/// Returns list of queues
-		/// </summary>
-		/// <param name="page">
-		/// Queue list page
-		/// </param>
-		public string[] queues (int page = 0)
-		{
-			string ep = "queues";
-			if (page != 0) {
-				ep += "?page=" + page.ToString ();
-			}
-			return serializer.Deserialize<string[]> (@get (ep));
-		}
+        public Queue queue(string name)
+        {
+            return new Queue (this, name);
+        }
+
+        /// <summary>
+        /// Returns list of queues
+        /// </summary>
+        /// <param name="page">
+        /// Queue list page
+        /// </param>
+        public string[] queues (int page = 0)
+        {
+            string ep = "queues";
+            if (page != 0) {
+                ep += "?page=" + page.ToString ();
+            }
+            return serializer.Deserialize<string[]> (@get (ep));
+        }
 
         public string delete(string endpoint)
         {
@@ -94,7 +86,7 @@ namespace io.iron.ironmq
             request.UserAgent = "IronMQ .Net Client";
             request.Method = method;
             if (body != null)
-            {                
+            {
                 using (System.IO.StreamWriter write = new System.IO.StreamWriter(request.GetRequestStream()))
                 {
                     write.Write(body);
@@ -113,8 +105,7 @@ namespace io.iron.ironmq
                 Error error = serializer.Deserialize<Error>(json);
                 throw new System.Web.HttpException((int)response.StatusCode, error.msg);
             }
-            return json;            
+            return json;
         }
-
     }
 }
