@@ -45,6 +45,18 @@ namespace io.iron.ironmq
         }
 
         /**
+        * Retrieves up to "max" messages from the queue
+        * @param max the count of messages to return, default is 1
+        **/
+
+        public IList<Message> get(int max = 1)
+        {
+            string json = client.get(string.Format("queues/{0}/messages?n={1}", name, max));
+            QueueMessages queueResp = serializer.Deserialize<QueueMessages>(json);
+            return queueResp.messages;
+        }
+
+        /**
         * Deletes a Message from the queue.
         *
         * @param id The ID of the message to delete.

@@ -132,7 +132,7 @@ namespace iron_mq_testing
         ///A test for push
         ///</summary>
         [TestMethod()]
-        public void bulkPushTest()
+        public void BulkPushTest()
         {
             Client c = new Client(_projectId, _token);
             Queue q = c.queue("test-queue");
@@ -153,7 +153,21 @@ namespace iron_mq_testing
             foreach (var msg in actual)
                 q.deleteMessage(msg);
         }
+        [TestMethod]
+        public void BulkGetTest()
+        {
+            Client c = new Client(_projectId, _token);
+            Queue q = c.queue("test_queue");
+            ClearQueue(q);
 
+            var messages = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
+            long timeout = 0;
+            q.push(messages, timeout);
+
+            var actual = q.get(100);
+            Assert.IsNotNull(actual);
+            Assert.IsTrue(actual.Count > 1);
+        }
         /// <summary>
         /// Test for clearing a queue.
         /// </summary>
