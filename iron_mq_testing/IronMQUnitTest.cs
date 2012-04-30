@@ -59,7 +59,13 @@ namespace iron_mq_testing
 
         private void ClearQueue(Queue q)
         {
-            q.clear();
+            try
+            {
+                q.clear();
+            }
+            catch { 
+                //TODO: This is here because of a bug in the Endpoint where clearing an empty queue results in a 500 internal server error.
+            }
         }
 
         [TestMethod]
@@ -138,20 +144,18 @@ namespace iron_mq_testing
             Queue q = c.queue("test-queue");
 
             ClearQueue(q);
-            var messages = Enumerable.Range(0, 1000).Select(i => i.ToString()).ToArray();
-            long timeout = 0; // TODO: Initialize to an appropriate value
+            var messages = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
+            long timeout = 0; 
             q.push(messages, timeout);
-            var actual = new List<Message>(1000);
-            for (int i = 0; i < 1000; i++)
+
+            for (int i = 0; i < 10; i++)
             {
                 var msg = q.get();
                 Assert.IsNotNull(msg);
-                actual.Add(msg);
             }
             // Assumption is that if we queued up 1000 and we got back 1000 then it worked fine.
             // Note: this does not verify we got back the same messages
-            foreach (var msg in actual)
-                q.deleteMessage(msg);
+         
         }
         [TestMethod]
         public void BulkGetTest()
@@ -176,7 +180,7 @@ namespace iron_mq_testing
         {
             Client c = new Client(_projectId, _token);
             Queue q = c.queue("test-queue");
-            q.clear();
+            ClearQueue(q);
 
             var messageBody = "This is a test of the emergency broadcasting system... Please stand by...";
             q.push(messageBody);
@@ -184,6 +188,19 @@ namespace iron_mq_testing
 
             var msg = q.get();
             Assert.IsNull(msg);
+        }
+
+        /// <summary>
+        /// Test For Clearing an empty queue
+        /// </summary>
+        [TestMethod]
+        public void ClearEmptyQueueTest()
+        {
+            Client c = new Client(_projectId, _token);
+            Queue q = c.queue("test-queue");
+            ClearQueue(q); 
+            // At this point the queue should be empty
+            q.clear();
         }
     }
 }
