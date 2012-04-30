@@ -157,7 +157,7 @@ namespace iron_mq_testing
         public void BulkGetTest()
         {
             Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test_queue");
+            Queue q = c.queue("test-queue");
             ClearQueue(q);
 
             var messages = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
