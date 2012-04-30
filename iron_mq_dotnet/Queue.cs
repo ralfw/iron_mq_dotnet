@@ -6,6 +6,9 @@ using io.iron.ironmq.Data;
 
 namespace io.iron.ironmq
 {
+    /// <summary>
+    /// Represends a specific IronMQ Queue.
+    /// </summary>
     public class Queue
     {
         private Client client = null;
@@ -18,6 +21,11 @@ namespace io.iron.ironmq
             this.name = name;
         }
 
+        /// <summary>
+        /// Clears a Queue regardless of message status
+        /// </summary>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void clear()
         {
             string emptyJsonObject = "{}";
@@ -29,14 +37,13 @@ namespace io.iron.ironmq
             }
         }
 
-        /**
-        * Retrieves a Message from the queue. If there are no items on the queue, an
-        * HTTPException is thrown.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
 
+        /// <summary>
+        /// Retrieves a Message from the queue. If there are no items on the queue, an HTTPException is thrown.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public Message get()
         {
             string json = client.get("queues/" + name + "/messages");
@@ -44,11 +51,13 @@ namespace io.iron.ironmq
             return queueResp.messages.Length > 0 ? queueResp.messages[0] : null;
         }
 
-        /**
-        * Retrieves up to "max" messages from the queue
-        * @param max the count of messages to return, default is 1
-        **/
-
+        /// <summary>
+        /// Retrieves up to "max" messages from the queue
+        /// </summary>
+        /// <param name="max">the count of messages to return, default is 1</param>
+        /// <returns>An IList of messages</returns>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public IList<Message> get(int max = 1)
         {
             string json = client.get(string.Format("queues/{0}/messages?n={1}", name, max));
@@ -56,73 +65,63 @@ namespace io.iron.ironmq
             return queueResp.messages;
         }
 
-        /**
-        * Deletes a Message from the queue.
-        *
-        * @param id The ID of the message to delete.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
-
+        /// <summary>
+        /// Delete a message from the queue
+        /// </summary>
+        /// <param name="id">Message Identifier</param>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void deleteMessage(String id)
         {
             client.delete("queues/" + name + "/messages/" + id);
         }
 
-        /**
-        * Deletes a Message from the queue.
-        *
-        * @param msg The message to delete.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
 
+
+        /// <summary>
+        /// Delete a message from the queue
+        /// </summary>
+        /// <param name="msg">Message to be deleted</param>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void deleteMessage(Message msg)
         {
             deleteMessage(msg.Id);
         }
 
-        /**
-        * Pushes a message onto the queue.
-        *
-        * @param msg The body of the message to push.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
 
+
+        /// <summary>
+        /// pushes a message onto the queue
+        /// </summary>
+        /// <param name="msg">Message to be pushed</param>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void push(String msg)
         {
             push(msg, 0);
         }
 
-        /**
-        * Pushes a message onto the queue.
-        *
-        * @param msg The body of the message to push.
-        * @param timeout The timeout of the message to push.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
-
+   
+        /// <summary>
+        /// Pushes a message onto the queue with a timeout
+        /// </summary>
+        /// <param name="msg">Message to be pushed.</param>
+        /// <param name="timeout">The timeout of the message to push.</param>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void push(String msg, long timeout)
         {
             push(new string[] { msg }, timeout);
         }
 
-        /**
-        * Pushes messages onto the queue.
-        *
-        * @param msgs The body of the messages to push.
-        * @param timeout The timeout of the message to push.
-        *
-        * @throws HTTPException If the IronMQ service returns a status other than 200 OK.
-        * @throws IOException If there is an error accessing the IronMQ server.
-        */
-
+        /// <summary>
+        /// Pushes messages onto the queue with an optional timeout
+        /// </summary>
+        /// <param name="msg">Messages to be pushed.</param>
+        /// <param name="timeout">The timeout of the messages to push.</param>
+        /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
+        /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public void push(IEnumerable<string> msgs, long timeout = 0)
         {
             client.post("queues/" + name + "/messages",
