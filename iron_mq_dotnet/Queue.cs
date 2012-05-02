@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.Script.Serialization;
 using io.iron.ironmq.Data;
+using Newtonsoft.Json;
 
 namespace io.iron.ironmq
 {
@@ -13,7 +14,7 @@ namespace io.iron.ironmq
     {
         private Client client = null;
         private string name = null;
-        private JavaScriptSerializer serializer = new JavaScriptSerializer();
+        private JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, DefaultValueHandling = DefaultValueHandling.Ignore };
 
         public Queue(Client client, string name)
         {
@@ -30,7 +31,7 @@ namespace io.iron.ironmq
         {
             string emptyJsonObject = "{}";
             var response = client.post("queues/" + name + "/clear", emptyJsonObject);
-            var responseObject = serializer.Deserialize<Dictionary<string, string>>(response);
+            var responseObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(response,settings);
             if (responseObject["msg"] != "Cleared")
             {
                 throw new Exception(string.Format("Unknown response from REST Endpoint : {0}", response));
@@ -47,7 +48,7 @@ namespace io.iron.ironmq
         public Message get()
         {
             string json = client.get("queues/" + name + "/messages");
-            QueueMessages queueResp = serializer.Deserialize<QueueMessages>(json);
+            QueueMessages queueResp = JsonConvert.DeserializeObject<QueueMessages>(json, settings);
             return queueResp.messages.Length > 0 ? queueResp.messages[0] : null;
         }
 
@@ -61,7 +62,7 @@ namespace io.iron.ironmq
         public IList<Message> get(int max = 1)
         {
             string json = client.get(string.Format("queues/{0}/messages?n={1}", name, max));
-            QueueMessages queueResp = serializer.Deserialize<QueueMessages>(json);
+            QueueMessages queueResp = JsonConvert.DeserializeObject<QueueMessages>(json,settings);
             return queueResp.messages;
         }
 
@@ -122,13 +123,14 @@ namespace io.iron.ironmq
         /// <param name="timeout">The timeout of the messages to push.</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void push(IEnumerable<string> msgs, long timeout = 0)
+        public void push(IEnumerable<string> msgs, long timeout = 0, long delay = 0, long expires_in = 0)
         {
-            client.post("queues/" + name + "/messages",
-                serializer.Serialize(new QueueMessages()
+            var json =  JsonConvert.SerializeObject(new QueueMessages()
                 {
-                    messages = msgs.Select(msg => new Message() { Body = msg, Timeout = timeout }).ToArray(),
-                }));
+                    messages = msgs.Select(msg => new Message() { Body = msg, Timeout = timeout, Delay = delay, Expires_In = expires_in }).ToArray(),
+                }, settings);
+            client.post("queues/" + name + "/messages", json
+               );
         }
     }
 }
