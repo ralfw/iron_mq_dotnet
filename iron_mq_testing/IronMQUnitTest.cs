@@ -13,15 +13,13 @@ namespace iron_mq_testing
     [TestClass]
     public class IronMQUnitTest
     {
-        private string _projectId = null;
-        private string _token = null;
+        private Credentials _credentials;
 
         public IronMQUnitTest()
         {
-            _projectId = ConfigurationManager.AppSettings["IRONIO_PROJECT_ID"];
-            _token = ConfigurationManager.AppSettings["IRONIO_TOKEN"];
-            Assert.IsFalse(string.IsNullOrWhiteSpace(_projectId));
-            Assert.IsFalse(string.IsNullOrWhiteSpace(_token));
+            _credentials = CredentialsRepository.LoadFrom("ironmq.credentials.txt");
+            Assert.IsFalse(string.IsNullOrWhiteSpace(_credentials.ProjectId));
+            Assert.IsFalse(string.IsNullOrWhiteSpace(_credentials.Token));
         }
 
         private TestContext testContextInstance;

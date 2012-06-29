@@ -12,13 +12,15 @@ namespace io.iron.ironmq
         private const int           PORT =          443;
         private const string        API_VERSION =   "1";
 
-        private string projectId = string.Empty;
-        private string token = string.Empty;
+        private readonly string projectId = string.Empty;
+        private readonly string token = string.Empty;
+
+        private JavaScriptSerializer serializer = new JavaScriptSerializer();
+
 
         public string Host { get; private set; }
         public int Port { get; private set; }
 
-        private JavaScriptSerializer serializer = new JavaScriptSerializer();
 
         /// <summary>
         /// Constructs a new Client using the specified project ID and token.
@@ -27,6 +29,7 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="projectId">projectId A 24-character project ID.</param>
         /// <param name="token">token An OAuth token.</param>
+        public Client(Credentials credentials, string host = HOST, int port = PORT) : this(credentials.ProjectId, credentials.Token, host, port) {}
         public Client(string projectId, string token, string host = HOST, int port = PORT)
         {
             this.projectId = projectId;
@@ -34,6 +37,7 @@ namespace io.iron.ironmq
             this.Host = host;
             this.Port = port;
         }
+
 
         /// <summary>
         /// Returns a Queue using the given name.
