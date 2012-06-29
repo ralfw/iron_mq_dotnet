@@ -47,7 +47,7 @@ namespace io.iron.ironmq
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public Message Dequeue()
         {
-            string json = _rest.Get("queues/" + _name + "/messages");
+            var json = _rest.Get("queues/" + _name + "/messages");
             var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json, settings);
             return queueResp.messages.Length > 0 ? queueResp.messages[0] : null;
         }
@@ -61,7 +61,7 @@ namespace io.iron.ironmq
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
         public IList<Message> Dequeue(int max = 1)
         {
-            string json = _rest.Get(string.Format("queues/{0}/messages?n={1}", _name, max));
+            var json = _rest.Get(string.Format("queues/{0}/messages?n={1}", _name, max));
             var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json,settings);
             return queueResp.messages;
         }
