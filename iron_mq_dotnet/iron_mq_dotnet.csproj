@@ -56,6 +56,7 @@
     <Compile Include="Queue.cs" />
     <Compile Include="Credentials.cs" />
     <Compile Include="CredentialsRepository.cs" />
+    <Compile Include="RESTadapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Extensions\" />

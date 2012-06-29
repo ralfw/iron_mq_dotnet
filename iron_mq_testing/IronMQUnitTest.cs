@@ -13,7 +13,7 @@ namespace iron_mq_testing
     [TestClass]
     public class IronMQUnitTest
     {
-        private Credentials _credentials;
+        private readonly Credentials _credentials;
 
         public IronMQUnitTest()
         {
@@ -22,44 +22,32 @@ namespace iron_mq_testing
             Assert.IsFalse(string.IsNullOrWhiteSpace(_credentials.Token));
         }
 
-        private TestContext testContextInstance;
-
         /// <summary>
         ///Gets or sets the test context which provides
         ///information about and functionality for the current test run.
         ///</summary>
-        public TestContext TestContext
-        {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
+        public TestContext TestContext { get; set; }
 
         [TestMethod]
         public void TestMethod1()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
             ClearQueue(q);
 
-            string body = "Hello, IronMQ!";
-            q.push(body);
+            var body = "Hello, IronMQ!";
+            q.Enqueue(body);
 
-            Message msg = q.get();
+            var msg = q.Dequeue();
             Assert.IsTrue(string.Compare(body, msg.Body) == 0);
-            q.deleteMessage(msg);
+            q.Delete(msg);
         }
 
         private void ClearQueue(Queue q)
         {
             try
             {
-                q.clear();
+                q.Clear();
             }
             catch { 
                 //TODO: This is here because of a bug in the Endpoint where clearing an empty queue results in a 500 internal server error.
@@ -69,32 +57,31 @@ namespace iron_mq_testing
         [TestMethod]
         public void BasicTests()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
 
             ClearQueue(q);
             // clear_queue
-            q.push("hello world!");
-            Message msg = q.get();
+            q.Enqueue("hello world!");
+            var msg = q.Dequeue();
             Assert.IsNotNull(msg.Id);
             Assert.IsNotNull(msg.Body);
 
-            q.deleteMessage(msg.Id);
-            msg = q.get();
+            q.Delete(msg.Id);
+            msg = q.Dequeue();
             Assert.IsNull(msg);
             
-            q.push("hello world 2!");
+            q.Enqueue("hello world 2!");
 
-            msg = q.get();
+            msg = q.Dequeue();
             Assert.IsNotNull(msg);
 
 
-            q.deleteMessage(msg.Id);
+            q.Delete(msg.Id);
 
 
-            msg = q.get();
+            msg = q.Dequeue();
             Assert.IsNull(msg);
-
         }
 
         /// <summary>
@@ -103,17 +90,17 @@ namespace iron_mq_testing
         [TestMethod()]
         public void BulkPushTest()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
 
             ClearQueue(q);
             var messages = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
-            long timeout = 0; 
-            q.push(messages, timeout);
+            const long timeout = 0; 
+            q.Enqueue(messages, timeout);
 
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
-                var msg = q.get();
+                var msg = q.Dequeue();
                 Assert.IsNotNull(msg);
             }
             // Assumption is that if we queued up 1000 and we got back 1000 then it worked fine.
@@ -123,15 +110,15 @@ namespace iron_mq_testing
         [TestMethod]
         public void BulkGetTest()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
             ClearQueue(q);
 
             var messages = Enumerable.Range(0, 10).Select(i => i.ToString()).ToArray();
-            long timeout = 0;
-            q.push(messages, timeout);
+            const long timeout = 0;
+            q.Enqueue(messages, timeout);
 
-            var actual = q.get(100);
+            var actual = q.Dequeue(100);
             Assert.IsNotNull(actual);
             Assert.IsTrue(actual.Count > 1);
         }
@@ -141,15 +128,15 @@ namespace iron_mq_testing
         [TestMethod]
         public void ClearQueueTest()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
             ClearQueue(q);
 
-            var messageBody = "This is a test of the emergency broadcasting system... Please stand by...";
-            q.push(messageBody);
-            q.clear();
+            const string messageBody = "This is a test of the emergency broadcasting system... Please stand by...";
+            q.Enqueue(messageBody);
+            q.Clear();
 
-            var msg = q.get();
+            var msg = q.Dequeue();
             Assert.IsNull(msg);
         }
 
@@ -159,11 +146,11 @@ namespace iron_mq_testing
         [TestMethod]
         public void ClearEmptyQueueTest()
         {
-            Client c = new Client(_projectId, _token);
-            Queue q = c.queue("test-queue");
+            var c = new Client(_credentials);
+            var q = c.Queue("test-queue");
             ClearQueue(q); 
             // At this point the queue should be empty
-            q.clear();
+            q.Clear();
         }
     }
 }

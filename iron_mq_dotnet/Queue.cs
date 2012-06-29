@@ -12,14 +12,14 @@ namespace io.iron.ironmq
     /// </summary>
     public class Queue
     {
-        private readonly Client _client = null;
+        private readonly RESTadapter _rest = null;
         private readonly string _name = null;
         private readonly JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, DefaultValueHandling = DefaultValueHandling.Ignore };
 
-        public Queue(Client client, string name)
+        internal Queue(RESTadapter rest, string name)
         {
-            this._client = client;
-            this._name = name;
+            _rest = rest;
+            _name = name;
         }
 
         /// <summary>
@@ -27,10 +27,10 @@ namespace io.iron.ironmq
         /// </summary>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void clear()
+        public void Clear()
         {
             const string emptyJsonObject = "{}";
-            var response = _client.post("queues/" + _name + "/clear", emptyJsonObject);
+            var response = _rest.Post("queues/" + _name + "/clear", emptyJsonObject);
             var responseObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(response,settings);
             if (responseObject["msg"] != "Cleared")
             {
@@ -45,9 +45,9 @@ namespace io.iron.ironmq
         /// <returns></returns>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public Message get()
+        public Message Dequeue()
         {
-            string json = _client.get("queues/" + _name + "/messages");
+            string json = _rest.Get("queues/" + _name + "/messages");
             var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json, settings);
             return queueResp.messages.Length > 0 ? queueResp.messages[0] : null;
         }
@@ -59,9 +59,9 @@ namespace io.iron.ironmq
         /// <returns>An IList of messages</returns>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public IList<Message> get(int max = 1)
+        public IList<Message> Dequeue(int max = 1)
         {
-            string json = _client.get(string.Format("queues/{0}/messages?n={1}", _name, max));
+            string json = _rest.Get(string.Format("queues/{0}/messages?n={1}", _name, max));
             var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json,settings);
             return queueResp.messages;
         }
@@ -72,9 +72,9 @@ namespace io.iron.ironmq
         /// <param name="id">Message Identifier</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void deleteMessage(String id)
+        public void Delete(String id)
         {
-            _client.delete("queues/" + _name + "/messages/" + id);
+            _rest.Delete("queues/" + _name + "/messages/" + id);
         }
 
 
@@ -85,9 +85,9 @@ namespace io.iron.ironmq
         /// <param name="msg">Message to be deleted</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void deleteMessage(Message msg)
+        public void Delete(Message msg)
         {
-            deleteMessage(msg.Id);
+            Delete(msg.Id);
         }
 
 
@@ -98,9 +98,9 @@ namespace io.iron.ironmq
         /// <param name="msg">Message to be pushed</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void push(String msg)
+        public void Enqueue(String msg)
         {
-            push(msg, 0);
+            Enqueue(msg, 0);
         }
 
    
@@ -111,9 +111,9 @@ namespace io.iron.ironmq
         /// <param name="timeout">The timeout of the message to push.</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void push(String msg, long timeout)
+        public void Enqueue(String msg, long timeout)
         {
-            push(new string[] { msg }, timeout);
+            Enqueue(new string[] { msg }, timeout);
         }
 
         /// <summary>
@@ -123,7 +123,7 @@ namespace io.iron.ironmq
         /// <param name="timeout">The timeout of the messages to push.</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void push(IEnumerable<string> msgs, long timeout = 0, long delay = 0, long expires_in = 0)
+        public void Enqueue(IEnumerable<string> msgs, long timeout = 0, long delay = 0, long expires_in = 0)
         {
             var json =  JsonConvert.SerializeObject(new QueueMessages()
                 {
@@ -131,7 +131,7 @@ namespace io.iron.ironmq
                 }, 
                 settings);
 
-            _client.post("queues/" + _name + "/messages", json);
+            _rest.Post("queues/" + _name + "/messages", json);
         }
     }
 }

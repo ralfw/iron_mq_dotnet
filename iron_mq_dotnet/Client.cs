@@ -7,15 +7,11 @@ namespace io.iron.ironmq
 {
     public class Client
     {
-        private const string        PROTO =         "https";
-        private const string        HOST =          "mq-aws-us-east-1.iron.io";
-        private const int           PORT =          443;
-        private const string        API_VERSION =   "1";
+        private const string HOST = "mq-aws-us-east-1.iron.io";
+        private const int    PORT = 443;
 
-        private readonly string projectId = string.Empty;
-        private readonly string token = string.Empty;
-
-        private JavaScriptSerializer serializer = new JavaScriptSerializer();
+        private readonly JavaScriptSerializer _serializer;
+        private readonly RESTadapter _rest;
 
 
         public string Host { get; private set; }
@@ -29,13 +25,14 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="projectId">projectId A 24-character project ID.</param>
         /// <param name="token">token An OAuth token.</param>
-        public Client(Credentials credentials, string host = HOST, int port = PORT) : this(credentials.ProjectId, credentials.Token, host, port) {}
-        public Client(string projectId, string token, string host = HOST, int port = PORT)
+        public Client(string projectId, string token, string host = HOST, int port = PORT) : this(new Credentials(projectId, token), host, port) {}
+        public Client(Credentials credentials, string host = HOST, int port = PORT)
         {
-            this.projectId = projectId;
-            this.token = token;
             this.Host = host;
             this.Port = port;
+
+            _serializer = new JavaScriptSerializer();
+            _rest = new RESTadapter(credentials, host, port, _serializer);
         }
 
 
@@ -45,9 +42,9 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="name">param name The name of the Queue to create.</param>
         /// <returns></returns>
-        public Queue queue(string name)
+        public Queue Queue(string name)
         {
-            return new Queue (this, name);
+            return new Queue(_rest, name);
         }
 
         /// <summary>
@@ -56,60 +53,11 @@ namespace io.iron.ironmq
         /// <param name="page">
         /// Queue list page
         /// </param>
-        public string[] queues (int page = 0)
+        public string[] Queues(int page = 0)
         {
-            string ep = "queues";
-            if (page != 0) {
-                ep += "?page=" + page.ToString ();
-            }
-            return serializer.Deserialize<string[]> (@get (ep));
-        }
-
-        public string delete(string endpoint)
-        {
-            return request("DELETE", endpoint, null);
-        }
-
-        public string get(string endpoint)
-        {
-            return request("GET", endpoint, null);
-        }
-
-        public string post(string endpoint, string body)
-        {
-            return request("POST", endpoint, body);
-        }
-
-        private string request(string method, string endpoint, string body)
-        {
-            string path = "/" + API_VERSION + "/projects/" + projectId + "/" + endpoint;
-            string uri = PROTO + "://" + this.Host + ":" + this.Port + path;
-            HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(uri);
-            request.ContentType = "application/json";
-            request.Headers.Add("Authorization", "OAuth " + token);
-            request.UserAgent = "IronMQ .Net Client";
-            request.Method = method;
-            if (body != null)
-            {
-                using (System.IO.StreamWriter write = new System.IO.StreamWriter(request.GetRequestStream()))
-                {
-                    write.Write(body);
-                    write.Flush();
-                }
-            }
-
-            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
-            string json = string.Empty;
-            using (System.IO.StreamReader reader = new System.IO.StreamReader(response.GetResponseStream()))
-            {
-                json = reader.ReadToEnd();
-            }
-            if (response.StatusCode != HttpStatusCode.OK)
-            {
-                Error error = serializer.Deserialize<Error>(json);
-                throw new System.Web.HttpException((int)response.StatusCode, error.msg);
-            }
-            return json;
+            var ep = "queues";
+            if (page != 0) { ep += "?page=" + page.ToString (); }
+            return _serializer.Deserialize<string[]>(_rest.Get(ep));
         }
     }
 }
