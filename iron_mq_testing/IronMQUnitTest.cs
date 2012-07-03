@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using NUnit.Framework;
 using io.iron.ironmq;
 using io.iron.ironmq.Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace iron_mq_testing
 {
     /// <summary>
     /// Summary description for IronMQUnitTest
     /// </summary>
-    [TestClass]
+    [TestFixture]
     public class IronMQUnitTest
     {
         private readonly Credentials _credentials;
@@ -28,7 +28,7 @@ namespace iron_mq_testing
         ///</summary>
         public TestContext TestContext { get; set; }
 
-        [TestMethod]
+        [Test]
         public void TestMethod1()
         {
             var c = new Client(_credentials);
@@ -54,7 +54,7 @@ namespace iron_mq_testing
             }
         }
 
-        [TestMethod]
+        [Test]
         public void BasicTests()
         {
             var c = new Client(_credentials);
@@ -87,7 +87,7 @@ namespace iron_mq_testing
         /// <summary>
         ///A test for push
         ///</summary>
-        [TestMethod()]
+        [Test]
         public void BulkPushTest()
         {
             var c = new Client(_credentials);
@@ -107,7 +107,8 @@ namespace iron_mq_testing
             // Note: this does not verify we got back the same messages
          
         }
-        [TestMethod]
+
+        [Test]
         public void BulkGetTest()
         {
             var c = new Client(_credentials);
@@ -122,10 +123,11 @@ namespace iron_mq_testing
             Assert.IsNotNull(actual);
             Assert.IsTrue(actual.Count > 1);
         }
+
         /// <summary>
         /// Test for clearing a queue.
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ClearQueueTest()
         {
             var c = new Client(_credentials);
@@ -143,7 +145,7 @@ namespace iron_mq_testing
         /// <summary>
         /// Test For Clearing an empty queue
         /// </summary>
-        [TestMethod]
+        [Test]
         public void ClearEmptyQueueTest()
         {
             var c = new Client(_credentials);

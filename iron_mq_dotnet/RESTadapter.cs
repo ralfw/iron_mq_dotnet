@@ -57,7 +57,7 @@ namespace io.iron.ironmq
             request.Method = method;
             if (body != null)
             {
-                using (var write = new System.IO.StreamWriter(request.GetRequestStream()))
+                using (var write = new StreamWriter(request.GetRequestStream()))
                 {
                     write.Write(body);
                     write.Flush();
@@ -66,7 +66,7 @@ namespace io.iron.ironmq
 
             var response = (HttpWebResponse)request.GetResponse();
             var json = string.Empty;
-            using (var reader = new System.IO.StreamReader(response.GetResponseStream()))
+            using (var reader = new StreamReader(response.GetResponseStream()))
             {
                 json = reader.ReadToEnd();
             }

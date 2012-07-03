@@ -69,12 +69,12 @@ namespace io.iron.ironmq
         /// <summary>
         /// Delete a message from the queue
         /// </summary>
-        /// <param name="id">Message Identifier</param>
+        /// <param name="messageId">Message Identifier</param>
         /// <exception cref="System.Web.HttpException">Thown if the IronMQ service returns a status other than 200 OK. </exception>
         /// <exception cref="System.IO.IOException">Thrown if there is an error accessing the IronMQ server.</exception>
-        public void Delete(String id)
+        public void Delete(String messageId)
         {
-            _rest.Delete("queues/" + _name + "/messages/" + id);
+            _rest.Delete("queues/" + _name + "/messages/" + messageId);
         }
 
 
