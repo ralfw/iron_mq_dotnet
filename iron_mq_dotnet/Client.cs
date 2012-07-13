@@ -7,8 +7,9 @@ namespace io.iron.ironmq
 {
     public class Client
     {
-        private const string HOST = "mq-aws-us-east-1.iron.io";
-        private const int    PORT = 443;
+        private const string PROTO_DEFAULT = "https";
+        private const int PORT_DEFAULT = 443;
+        private const string HOST_DEFAULT = "mq-aws-us-east-1.iron.io";
 
         private readonly JavaScriptSerializer _serializer;
         private readonly RESTadapter _rest;
@@ -25,14 +26,15 @@ namespace io.iron.ironmq
         /// </summary>
         /// <param name="projectId">projectId A 24-character project ID.</param>
         /// <param name="token">token An OAuth token.</param>
-        public Client(string projectId, string token, string host = HOST, int port = PORT) : this(new Credentials(projectId, token), host, port) {}
-        public Client(Credentials credentials, string host = HOST, int port = PORT)
+        public Client(string projectId, string token, string proto = PROTO_DEFAULT, string host = HOST_DEFAULT, int port = PORT_DEFAULT) 
+                : this(new Credentials(projectId, token), proto, host, port) {}
+        public Client(Credentials credentials, string proto = PROTO_DEFAULT, string host = HOST_DEFAULT, int port = PORT_DEFAULT)
         {
             this.Host = host;
             this.Port = port;
 
             _serializer = new JavaScriptSerializer();
-            _rest = new RESTadapter(credentials, host, port, _serializer);
+            _rest = new RESTadapter(credentials, proto, host, port, _serializer);
         }
 
 
@@ -47,13 +49,19 @@ namespace io.iron.ironmq
             return new Queue(_rest, name);
         }
 
+        public Queue this[string queueName]
+        {
+            get { return Queue(queueName); }
+        }
+
+
         /// <summary>
         /// Returns list of queues
         /// </summary>
         /// <param name="page">
         /// Queue list page
         /// </param>
-        public string[] Queues(int page = 0)
+        public string[] QueuesNames(int page = 0)
         {
             var ep = "queues";
             if (page != 0) { ep += "?page=" + page.ToString (); }

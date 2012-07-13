@@ -14,7 +14,7 @@ namespace io.iron.ironmq
     {
         private readonly RESTadapter _rest = null;
         private readonly string _name = null;
-        private readonly JsonSerializerSettings settings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, Formatting = Formatting.None, DefaultValueHandling = DefaultValueHandling.Ignore };
+        private readonly JsonSerializerSettings _jsonSerializerSettings = new JsonSerializerSettings() { NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore };
 
         internal Queue(RESTadapter rest, string name)
         {
@@ -31,7 +31,7 @@ namespace io.iron.ironmq
         {
             const string emptyJsonObject = "{}";
             var response = _rest.Post("queues/" + _name + "/clear", emptyJsonObject);
-            var responseObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(response,settings);
+            var responseObject = JsonConvert.DeserializeObject<Dictionary<string, string>>(response,_jsonSerializerSettings);
             if (responseObject["msg"] != "Cleared")
             {
                 throw new Exception(string.Format("Unknown response from REST Endpoint : {0}", response));
@@ -48,7 +48,7 @@ namespace io.iron.ironmq
         public Message Dequeue()
         {
             var json = _rest.Get("queues/" + _name + "/messages");
-            var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json, settings);
+            var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json, _jsonSerializerSettings);
             return queueResp.messages.Length > 0 ? queueResp.messages[0] : null;
         }
 
@@ -62,7 +62,7 @@ namespace io.iron.ironmq
         public IList<Message> Dequeue(int max = 1)
         {
             var json = _rest.Get(string.Format("queues/{0}/messages?n={1}", _name, max));
-            var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json,settings);
+            var queueResp = JsonConvert.DeserializeObject<QueueMessages>(json,_jsonSerializerSettings);
             return queueResp.messages;
         }
 
@@ -128,8 +128,10 @@ namespace io.iron.ironmq
             var json =  JsonConvert.SerializeObject(new QueueMessages()
                 {
                     messages = msgs.Select(msg => new Message() { Body = msg, Timeout = timeout, Delay = delay, Expires_In = expires_in }).ToArray(),
-                }, 
-                settings);
+                }
+                );
+ 
+                //_jsonSerializerSettings);
 
             _rest.Post("queues/" + _name + "/messages", json);
         }
